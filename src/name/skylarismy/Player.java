@@ -5,6 +5,8 @@
  */
 package name.skylarismy;
 
+import javax.sound.sampled.SourceDataLine;
+
 /**
  *
  * @author skylar
@@ -13,28 +15,32 @@ public class Player extends Thread {
 
     private final BellNote[] song;
     private final Note myNote;
+    private final Conductor con;
+    private final SourceDataLine line;
 
-    public Player(Note n, BellNote[] music) {
+    public Player(Note n, BellNote[] music, SourceDataLine l, Conductor c) {
         song = music;
         myNote = n;
-        System.out.println(this.getName() + " assigned note: " + n.toString());
+        con = c;
+        line = l;
+        //System.out.println(this.getName() + " assigned note: " + n.toString());
     }
 
     @Override
     public void run() {
-        while (Conductor.currentNote < song.length) {
-            BellNote bn = song[Conductor.currentNote];
+        while (con.currentNote < song.length) {
+            BellNote bn = song[con.currentNote];
             if (bn.note == myNote) {
-                System.out.println(bn.note.name() + "\t" + this.getName());
-                Conductor.playNote(bn);
-                Conductor.currentNote++;
-                synchronized (Conductor.line) {
-                    Conductor.line.notifyAll();
+                //System.out.println(bn.note.name() + "\t" + this.getName());
+                con.playNote(bn, line);
+                con.currentNote++;
+                synchronized (con.line) {
+                    con.line.notifyAll();
                 }
             } else {
-                synchronized (Conductor.line) {
+                synchronized (con.line) {
                     try {
-                        Conductor.line.wait();
+                        con.line.wait();
                     } catch (InterruptedException ex) {
                     }
                 }

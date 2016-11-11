@@ -3,6 +3,18 @@ package name.skylarismy;
 enum Note {
     // REST Must be the first 'Note'
     REST,
+    A1,
+    A1S,
+    B1,
+    C1,
+    C1S,
+    D1,
+    D1S,
+    E1,
+    F1,
+    F1S,
+    G1,
+    G1S,
     A2,
     A2S,
     B2,
@@ -67,10 +79,7 @@ enum Note {
         int n = this.ordinal();
         if (n > 0) {
             // Calculate the frequency!
-            double halfStepUpFromA = n;
-//            if (n < 37) {
-//                halfStepUpFromA = n - 73;
-//            }
+            double halfStepUpFromA = n - 25;
             final double exp = halfStepUpFromA / 12.0d;
             final double freq = FREQUENCY_A_HZ * Math.pow(2.0d, exp);
 
