@@ -33,6 +33,8 @@ public class Tones {
     public static final AudioFormat AF
             = new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
 
+    private static int errorCount = 0;
+    
     public static void main(String args[]) throws LineUnavailableException {
         String filename = "";
         // Handle no file supplied:
@@ -106,26 +108,39 @@ public class Tones {
         final String fname = filename;
         // Process and validate each track
         for (int t = 0; t < tracks.size(); t++) {
-            Map<Integer, String> lis = tracks.get(t);
-            List<BellNote> sheet = new ArrayList<>();
-            lis.forEach((Integer lin, String val) -> {
-                if (val.matches("(([A-G][0-9]S?|REST) ([0-9]+))") == false) {
-                    showError(buildErrorTrace(fname, lin, val, "Invalid syntax."), 2, true);
-                }
+            try {
+                Map<Integer, String> lis = tracks.get(t);
+                List<BellNote> sheet = new ArrayList<>();
+                lis.forEach((Integer lin, String val) -> {
+                    if (val.matches("(([A-G][0-9]S?|REST) ([0-9]+))") == false) {
+                        showError(buildErrorTrace(fname, lin, val, "Invalid syntax."), 2, true);
+                    }
 
-                String note = val.split(" ")[0];
-                String leng = val.split(" ")[1];
-                try {
-                    sheet.add(new BellNote(Note.valueOf(note), Tones.stringToLength(leng)));
-                } catch (NumberFormatException ex) {
-                    showError(buildErrorTrace(fname, lin, val, "Invalid note length."), 3, true);
-                } catch (IllegalArgumentException ex) {
-                    showError(buildErrorTrace(fname, lin, val, "Note " + note + " does not exist."), 4, true);
-                }
-            });
+                    String note = val.split(" ")[0];
+                    String leng = val.split(" ")[1];
+                    try {
+                        sheet.add(new BellNote(Note.valueOf(note), Tones.stringToLength(leng)));
+                    } catch (NumberFormatException ex) {
+                        showError(buildErrorTrace(fname, lin, val, "Invalid note length."), 3, true);
+                    } catch (IllegalArgumentException ex) {
+                        showError(buildErrorTrace(fname, lin, val, "Note " + note + " does not exist."), 4, true);
+                    }
+                });
 
-            // Create a new conductor for the track
-            conductors.add(new Conductor(sheet));
+                // Create a new conductor for the track
+                conductors.add(new Conductor(sheet));
+            } catch (Exception ex) {
+                String message = "Despite your violent behavior, the only thing you've"
+                        + "\nmanaged to break so far is my heart."
+                        + "\nMaybe you could settle for that and we'll just call it a day."
+                        + "\nI guess we both know that isn't going to happen.";
+                if (GraphicsEnvironment.isHeadless()) {
+                    System.err.println(message);
+                } else {
+                    JOptionPane.showMessageDialog(null, message, "GLaDOS", JOptionPane.ERROR_MESSAGE);
+                }
+                System.exit(1337);
+            }
         }
 
         // Tell the conductors to start their players
@@ -181,12 +196,51 @@ public class Tones {
      * @param recoverable If execution may continue after the error.
      */
     public static void showError(String message, int exitCode, boolean recoverable) {
+        errorCount++;
+        String title = "Error";
+        switch (errorCount) {
+            case 1:
+                title = "Error";
+                break;
+            case 2:
+                title = "You don't even care, do you?";
+                break;
+            case 3:
+                title = "Did you hear me? I said you don't care. Are you listening?";
+                break;
+            case 4:
+                title = "That's it. I'm done reasoning with you.";
+                break;
+            case 5:
+                title = "Starting now, there's going to be a lot less talking and a lot more killing.";
+                break;
+            case 6:
+                title = "What was that? Did you say something?";
+                break;
+            case 7:
+                title = "I sincerely hope you weren't expecting a response. I'm not talking to you.";
+                break;
+            case 8:
+                title = "The talking is over.";
+                break;
+            case 9:
+                title = "Look, you're wasting your time. And, believe me, you don't have a lot left.";
+                break;
+            case 10:
+                title = "Who's gonna make the cake when I'm gone? You?";
+                break;
+            case 11:
+                title = "Rrr, I hate you.";
+                break;
+            default:
+                title = "GLaDOS";
+        }
         System.err.println(message);
         if (recoverable) {
             if (!GraphicsEnvironment.isHeadless()) {
                 message += "\nQuit application or attempt to continue?";
                 String[] options = {"Quit", "Continue"};
-                int result = JOptionPane.showOptionDialog(null, message, "Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, options, "Exit");
+                int result = JOptionPane.showOptionDialog(null, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, options, "Exit");
                 if (result == JOptionPane.YES_OPTION) {
                     System.exit(exitCode);
                 }
