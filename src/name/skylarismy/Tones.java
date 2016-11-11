@@ -15,18 +15,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.function.BiConsumer;
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /**
- *
- * @author skylar
+ * The main class. Loads and validates input and creates Conductors.
  */
 public class Tones {
 
+    /**
+     * All the conductors for the different tracks.
+     */
     public static List<Conductor> conductors = new ArrayList<>();
+
+    public static final AudioFormat AF
+            = new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
 
     public static void main(String args[]) throws LineUnavailableException {
         String filename = "";
@@ -57,8 +62,8 @@ public class Tones {
             filename = args[0];
         }
 
-        System.out.println("Reading...");
         // Read in the file to a List
+        System.out.println("Reading...");
         List<String> lines = null;
         try {
             lines = Files.readAllLines(Paths.get(filename));
@@ -66,8 +71,8 @@ public class Tones {
             showError("Error: Cannot load music sheet: " + ex.getMessage(), 1);
         }
 
-        System.out.println("Parsing...");
         // Start reading/parsing lines
+        System.out.println("Parsing...");
         List<Map<Integer, String>> tracks = new ArrayList<>();
         for (int i = 0; i < lines.size(); i++) {
             // Get the current line into a String
@@ -81,13 +86,14 @@ public class Tones {
             if (line.startsWith("#") || line.startsWith("//") || line.startsWith(";")) {
                 continue;
             }
-            
-            // Metadata
+
+            // Handle metadata
             if (line.startsWith("=")) {
                 System.out.println(line.replaceFirst("=", " "));
                 continue;
             }
 
+            // Split up the tracks
             String[] cols = line.split("\\|");
             for (int j = 0; j < cols.length; j++) {
                 if (tracks.size() < j + 1) {
@@ -98,6 +104,7 @@ public class Tones {
         }
 
         final String fname = filename;
+        // Process and validate each track
         for (int t = 0; t < tracks.size(); t++) {
             Map<Integer, String> lis = tracks.get(t);
             List<BellNote> sheet = new ArrayList<>();
@@ -117,14 +124,33 @@ public class Tones {
                 }
             });
 
-            conductors.add(new Conductor(sheet, filename));
+            // Create a new conductor for the track
+            conductors.add(new Conductor(sheet));
         }
+
+        // Tell the conductors to start their players
         System.out.println("Playing...");
         for (int i = 0; i < conductors.size(); i++) {
             conductors.get(i).start();
         }
     }
 
+    /**
+     * Get the AudioFormat.
+     *
+     * @return AudioFormat the format of the audio.
+     */
+    public static AudioFormat getAudioFormat() {
+        return AF;
+    }
+
+    /**
+     * Converts a String into a NoteLength.
+     *
+     * @param s the String to convert
+     * @return a NoteLength corresponding to the input
+     * @throws NumberFormatException if the String isn't a valid note length
+     */
     public static NoteLength stringToLength(String s) throws NumberFormatException {
         switch (s) {
             case "1":

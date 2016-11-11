@@ -85,11 +85,7 @@ enum Note {
 
             final double step = freq * step_alpha;
             for (int i = 0; i < sinSample.length; i++) {
-                //if (n < 37) {
-                //    sinSample[i] = (byte) (Math.tan(i * step) * MAX_VOLUME / 2);
-                //} else {
                 sinSample[i] = (byte) (Math.sin(i * step) * MAX_VOLUME);
-                //}
             }
         }
     }
