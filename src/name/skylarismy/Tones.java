@@ -34,7 +34,7 @@ public class Tones {
             = new AudioFormat(Note.SAMPLE_RATE, 8, 1, true, false);
 
     private static int errorCount = 0;
-    
+
     public static void main(String args[]) throws LineUnavailableException {
         String filename = "";
         // Handle no file supplied:
@@ -42,7 +42,13 @@ public class Tones {
         // If there *is* a file supplied as the first argument, we'll use that.
         if (args.length < 1) {
             if (GraphicsEnvironment.isHeadless()) {
-                showError("Error: No input file specified.  Please pass a filename.", 1);
+                System.out.print("\nPlease enter a filename: ");
+                Scanner sc = new Scanner(System.in);
+                if (sc.hasNextLine()) {
+                    filename = sc.nextLine();
+                } else {
+                    showError("Error: No input file specified.  Please supply a filename.", 1);
+                }
             } else {
                 final JFileChooser fc = new JFileChooser();
                 fc.setDialogTitle("Open a song");
@@ -245,7 +251,7 @@ public class Tones {
                     System.exit(exitCode);
                 }
             } else {
-                System.err.print("\nQuit application? (Y/n): ");
+                System.err.print("Quit application? (Y/n): ");
                 Scanner sc = new Scanner(System.in);
                 if (sc.hasNext()) {
                     String yn = sc.nextLine();
